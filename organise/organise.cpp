@@ -4,10 +4,6 @@
 #include <filesystem>
 #include <vector>
 
-/*******************************************************
-* Compile this with these flags :-std=c++17 -lstdc++fs *
-********************************************************/
-
 const std::string DELIMITER = "/";
 
 /**
@@ -131,14 +127,12 @@ std::string getRelativePath(std::string t_absolutePath)
 std::vector<std::string> getFilesInFolder(std::string t_directory)
 {
     std::vector<std::string> result;
-    std::filesystem::path absolutePath;
     std::string absolutePathString, fileString;
     // Loop through the files in the given directory.
     for (auto& entry : std::filesystem::directory_iterator(t_directory))
     {
         // Convert from std::filesystem::directory_entry to string.
-        absolutePath = std::filesystem::absolute(entry.path());
-        absolutePathString = absolutePath.string();
+        absolutePathString = std::filesystem::absolute(entry.path()).string();
         fileString = getRelativePath(absolutePathString);
         // If the file is not a normal file, ignore it.
         if (!entry.is_regular_file()) continue;
