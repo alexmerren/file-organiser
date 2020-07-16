@@ -73,7 +73,7 @@ void createDirectory(std::string t_folder)
     catch (const std::filesystem::filesystem_error& e)
     {
         // If it cannot create a directory it prints an error.
-        std::perror("");
+        std::printf("Could not create directory %s\n", t_folder.c_str());
     }
 }
 
@@ -89,22 +89,19 @@ void moveFile(std::string t_filename, std::string t_folder)
     catch (const std::filesystem::filesystem_error& e)
     {
         // If it cannot move the file it prints an error.
-        std::perror("");
+        std::printf("Could not move %s\n", t_filename.c_str());
     }
 }
 
 bool checkFolderExists(std::string t_folder)
 {
-    if ( !std::filesystem::exists(t_folder) )
-    {
-        // If the folder does not exist, return false.
-        return false;
-    }
-    else 
+    bool exists = false;
+    if ( std::filesystem::exists(t_folder) )
     {
         // If the folder does exist, return true.
-        return true;
+        exists = true;
     }
+    return exists;
 }
 
 std::string getFileExtension(std::string t_filename)
@@ -134,13 +131,22 @@ std::vector<std::string> getFilesInFolder(std::string t_directory)
         // Convert from std::filesystem::directory_entry to string.
         absolutePathString = std::filesystem::absolute(entry.path()).string();
         fileString = getRelativePath(absolutePathString);
-        // If the file is not a normal file, ignore it.
-        if (!entry.is_regular_file()) continue;
-        // If the file is the same as the executeable, ignore it.
-        if (fileString == "organise") continue;
-        // If the relative path does not have a period in it, ignore it.
-        if (fileString.find('.') == std::string::npos) continue;
-        result.push_back(fileString);
+        try 
+        {
+            // If there is no extension, or if the file is named organise,
+            // Do not process it.
+            if (fileString.find('.') == std::string::npos
+                || !entry.is_regular_file()
+                || fileString == "organise")
+            {
+                throw std::exception();
+            }
+            result.push_back(fileString);
+        }
+        catch (std::exception& e)
+        {
+            std::printf("Could not process %s\n", fileString.c_str());
+        }
     }
     return result;
 }
